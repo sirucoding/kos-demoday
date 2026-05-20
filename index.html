@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>상품등록 검토 도우미 — 데모데이 발표</title>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --kt-red: #E8192C;
+    --kt-dark: #1A1A2E;
+    --kt-gray: #F5F5F7;
+    --kt-mid: #6E6E73;
+    --kt-light: #FBFBFD;
+    --accent: #0066CC;
+    --warn: #FF6B00;
+    --ok: #1DB954;
+  }
+
+  body {
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    background: #000;
+    color: #fff;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .slide-container {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 80px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .slide.active {
+    display: flex;
+    opacity: 1;
+  }
+
+  /* ──────────────── SLIDE THEMES ──────────────── */
+
+  .theme-cover {
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #0a1a2e 100%);
+  }
+  .theme-problem {
+    background: linear-gradient(135deg, #1a0a0a 0%, #2e0a0a 100%);
+  }
+  .theme-colleague {
+    background: linear-gradient(135deg, #0a1a2e 0%, #0a0e2e 100%);
+  }
+  .theme-expand {
+    background: linear-gradient(135deg, #0a1a0e 0%, #0a2e1a 100%);
+  }
+  .theme-tacit {
+    background: linear-gradient(135deg, #1a1a0a 0%, #2e2a0a 100%);
+  }
+  .theme-demo {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  }
+  .theme-end {
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 100%);
+  }
+
+  /* ──────────────── COMMON ELEMENTS ──────────────── */
+
+  .slide-num {
+    position: absolute;
+    top: 28px;
+    right: 40px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.25);
+    letter-spacing: 2px;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 100px;
+    margin-bottom: 24px;
+  }
+
+  .tag-red { background: rgba(232,25,44,0.2); color: #ff4d5e; border: 1px solid rgba(232,25,44,0.4); }
+  .tag-blue { background: rgba(0,102,204,0.2); color: #4d9eff; border: 1px solid rgba(0,102,204,0.4); }
+  .tag-green { background: rgba(29,185,84,0.2); color: #4ddd88; border: 1px solid rgba(29,185,84,0.4); }
+  .tag-yellow { background: rgba(255,200,0,0.15); color: #ffd84d; border: 1px solid rgba(255,200,0,0.3); }
+  .tag-gray { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.15); }
+
+  h1 { font-size: 52px; font-weight: 800; line-height: 1.15; letter-spacing: -1.5px; }
+  h2 { font-size: 38px; font-weight: 700; line-height: 1.2; letter-spacing: -1px; }
+  h3 { font-size: 22px; font-weight: 600; line-height: 1.4; }
+  p { font-size: 17px; line-height: 1.7; color: rgba(255,255,255,0.72); }
+
+  .sub { font-size: 20px; color: rgba(255,255,255,0.55); font-weight: 400; margin-top: 16px; }
+  .highlight { color: #fff; font-weight: 700; }
+
+  .divider {
+    width: 48px;
+    height: 3px;
+    background: var(--kt-red);
+    border-radius: 2px;
+    margin: 24px 0;
+  }
+
+  /* ──────────────── CARDS ──────────────── */
+
+  .cards {
+    display: grid;
+    gap: 20px;
+    width: 100%;
+    max-width: 960px;
+  }
+  .cards.col2 { grid-template-columns: 1fr 1fr; }
+  .cards.col3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 28px 32px;
+  }
+  .card .icon { font-size: 32px; margin-bottom: 14px; }
+  .card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .card p { font-size: 15px; line-height: 1.65; color: rgba(255,255,255,0.6); }
+
+  .card.red-glow { border-color: rgba(232,25,44,0.3); background: rgba(232,25,44,0.07); }
+  .card.blue-glow { border-color: rgba(0,102,204,0.3); background: rgba(0,102,204,0.07); }
+  .card.green-glow { border-color: rgba(29,185,84,0.3); background: rgba(29,185,84,0.07); }
+  .card.yellow-glow { border-color: rgba(255,200,0,0.3); background: rgba(255,200,0,0.05); }
+
+  /* ──────────────── FLOW ──────────────── */
+
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .flow-step {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .flow-arrow { color: rgba(255,255,255,0.3); font-size: 20px; }
+  .flow-step.bad { border-color: rgba(232,25,44,0.4); background: rgba(232,25,44,0.1); color: #ff4d5e; }
+  .flow-step.good { border-color: rgba(29,185,84,0.4); background: rgba(29,185,84,0.1); color: #4ddd88; }
+  .flow-step.human { border-color: rgba(255,200,0,0.4); background: rgba(255,200,0,0.08); color: #ffd84d; }
+
+  /* ──────────────── QUOTE ──────────────── */
+
+  .quote {
+    border-left: 3px solid var(--kt-red);
+    padding: 16px 24px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 0 12px 12px 0;
+    font-size: 17px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.75);
+    max-width: 760px;
+  }
+  .quote strong { color: #fff; }
+
+  /* ──────────────── STAT ──────────────── */
+
+  .stat-row {
+    display: flex;
+    gap: 48px;
+    align-items: flex-end;
+  }
+  .stat { text-align: center; }
+  .stat .num {
+    font-size: 64px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1;
+  }
+  .stat .unit { font-size: 20px; font-weight: 600; margin-left: 4px; }
+  .stat .label { font-size: 14px; color: rgba(255,255,255,0.5); margin-top: 8px; }
+  .stat.red .num { color: #ff4d5e; }
+  .stat.green .num { color: #4ddd88; }
+
+  /* ──────────────── RULE LIST ──────────────── */
+
+  .rule-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+    max-width: 960px;
+  }
+  .rule-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 14px;
+  }
+  .rule-item .rnum {
+    flex-shrink: 0;
+    background: rgba(255,200,0,0.15);
+    color: #ffd84d;
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 12px;
+  }
+  .rule-item .rtxt { color: rgba(255,255,255,0.7); line-height: 1.5; }
+  .rule-item .rtxt strong { color: #fff; display: block; font-size: 14px; }
+
+  /* ──────────────── NAV ──────────────── */
+
+  .nav {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    z-index: 100;
+  }
+
+  .nav button {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .nav button:hover { background: rgba(255,255,255,0.2); }
+  .nav button:disabled { opacity: 0.2; cursor: default; }
+  .nav button.primary {
+    background: var(--kt-red);
+    border-color: var(--kt-red);
+    font-weight: 700;
+  }
+  .nav button.primary:hover { background: #c4152a; }
+
+  .dots {
+    display: flex;
+    gap: 7px;
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .dot.active {
+    background: #fff;
+    transform: scale(1.3);
+  }
+
+  /* ──────────────── COVER SPECIFIC ──────────────── */
+
+  .cover-content { text-align: center; }
+  .cover-content h1 { font-size: 58px; }
+  .cover-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(232,25,44,0.15);
+    border: 1px solid rgba(232,25,44,0.3);
+    border-radius: 100px;
+    padding: 8px 20px;
+    font-size: 13px;
+    color: #ff4d5e;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 32px;
+  }
+
+  /* ──────────────── TIMELINE ──────────────── */
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+    max-width: 720px;
+  }
+  .tl-item {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    padding: 16px 0;
+    position: relative;
+  }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 48px;
+    bottom: -16px;
+    width: 2px;
+    background: rgba(255,255,255,0.1);
+  }
+  .tl-item:last-child::before { display: none; }
+  .tl-dot {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    border: 2px solid;
+  }
+  .tl-dot.red { background: rgba(232,25,44,0.2); border-color: #ff4d5e; color: #ff4d5e; }
+  .tl-dot.blue { background: rgba(0,102,204,0.2); border-color: #4d9eff; color: #4d9eff; }
+  .tl-dot.green { background: rgba(29,185,84,0.2); border-color: #4ddd88; color: #4ddd88; }
+  .tl-dot.yellow { background: rgba(255,200,0,0.15); border-color: #ffd84d; color: #ffd84d; }
+  .tl-body h3 { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+  .tl-body p { font-size: 14px; color: rgba(255,255,255,0.55); }
+
+  /* ──────────────── BEFORE/AFTER ──────────────── */
+
+  .ba-wrap {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+    max-width: 900px;
+  }
+  .ba-col {
+    border-radius: 16px;
+    padding: 28px;
+  }
+  .ba-col.before {
+    background: rgba(232,25,44,0.07);
+    border: 1px solid rgba(232,25,44,0.2);
+  }
+  .ba-col.after {
+    background: rgba(29,185,84,0.07);
+    border: 1px solid rgba(29,185,84,0.2);
+  }
+  .ba-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .ba-col.before .ba-label { color: #ff4d5e; }
+  .ba-col.after .ba-label { color: #4ddd88; }
+  .ba-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    font-size: 15px;
+    color: rgba(255,255,255,0.7);
+  }
+  .ba-item:last-child { border-bottom: none; }
+  .ba-arrow { text-align: center; font-size: 28px; color: rgba(255,255,255,0.2); }
+
+  /* ──────────────── HOVER ANIMATIONS ──────────────── */
+
+  .hover-lift {
+    transition: background 0.25s, border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  }
+  .hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: rgba(0,0,0,0.3) 0px 16px 40px;
+    border-color: rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.07);
+  }
+  .hover-lift-blue:hover {
+    transform: translateY(-3px);
+    box-shadow: rgba(0,102,204,0.3) 0px 12px 32px;
+    border-color: rgba(0,102,204,0.5) !important;
+    background: rgba(0,102,204,0.18) !important;
+  }
+  .hover-lift-yellow:hover {
+    transform: translateY(-3px);
+    box-shadow: rgba(255,200,0,0.25) 0px 12px 32px;
+    border-color: rgba(255,200,0,0.45) !important;
+    background: rgba(255,200,0,0.14) !important;
+  }
+  .hover-lift-green:hover {
+    transform: translateY(-3px);
+    box-shadow: rgba(29,185,84,0.3) 0px 12px 32px;
+    border-color: rgba(29,185,84,0.5) !important;
+    background: rgba(29,185,84,0.14) !important;
+  }
+  .hover-lift-blue, .hover-lift-yellow, .hover-lift-green {
+    transition: background 0.25s, border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  }
+
+  .flow-step {
+    transition: background 0.25s, border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  }
+  .flow-step:hover {
+    transform: translateY(-2px);
+    box-shadow: rgba(0,0,0,0.3) 0px 8px 24px;
+    border-color: rgba(255,255,255,0.25);
+  }
+  .flow-step.bad:hover {
+    box-shadow: rgba(232,25,44,0.2) 0px 8px 24px;
+    border-color: rgba(232,25,44,0.55);
+  }
+
+  .card {
+    transition: background 0.25s, border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+    cursor: default;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: rgba(0,0,0,0.35) 0px 16px 40px;
+    border-color: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.09);
+  }
+  .card.red-glow:hover {
+    transform: translateY(-3px);
+    box-shadow: rgba(232,25,44,0.25) 0px 16px 40px;
+    border-color: rgba(232,25,44,0.5);
+    background: rgba(232,25,44,0.12);
+  }
+  .card.blue-glow:hover {
+    transform: translateY(-3px);
+    box-shadow: rgba(0,102,204,0.3) 0px 16px 40px;
+    border-color: rgba(0,102,204,0.55);
+    background: rgba(0,102,204,0.12);
+  }
+  .card.green-glow:hover {
+    transform: translateY(-3px);
+    box-shadow: rgba(29,185,84,0.3) 0px 16px 40px;
+    border-color: rgba(29,185,84,0.55);
+    background: rgba(29,185,84,0.12);
+  }
+  .card.yellow-glow:hover {
+    transform: translateY(-3px);
+    box-shadow: rgba(255,200,0,0.25) 0px 16px 40px;
+    border-color: rgba(255,200,0,0.5);
+    background: rgba(255,200,0,0.1);
+  }
+
+  .quote {
+    transition: background 0.25s, border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  }
+  .quote:hover {
+    transform: translateY(-3px);
+    box-shadow: rgba(0,0,0,0.3) 0px 16px 40px;
+    background: rgba(255,255,255,0.07);
+  }
+
+  .rule-item {
+    transition: background 0.25s, border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  }
+  .rule-item:hover {
+    transform: translateY(-3px);
+    box-shadow: rgba(255,200,0,0.2) 0px 12px 32px;
+    border-color: rgba(255,200,0,0.25);
+    background: rgba(255,200,0,0.07);
+  }
+
+  .ba-col {
+    transition: background 0.25s, border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  }
+  .ba-col.before:hover {
+    transform: translateY(-3px);
+    box-shadow: rgba(232,25,44,0.25) 0px 16px 40px;
+    border-color: rgba(232,25,44,0.4);
+  }
+  .ba-col.after:hover {
+    transform: translateY(-3px);
+    box-shadow: rgba(29,185,84,0.25) 0px 16px 40px;
+    border-color: rgba(29,185,84,0.4);
+  }
+
+  /* keyboard shortcut hint */
+  .key-hint {
+    position: fixed;
+    top: 28px;
+    left: 40px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1: 표지 -->
+<div class="slide theme-cover active" id="slide-0">
+  <span class="slide-num">01 / 08</span>
+  <div class="cover-content">
+    <div class="cover-badge">
+      <span>●</span> 광화문 라이언즈 2기 데모데이
+    </div>
+    <h1>상품등록<br>검토 도우미</h1>
+    <div class="divider" style="margin: 28px auto;"></div>
+    <p class="sub"> AI로 빠르게 처리하기 1팀 · 성유나</p>
+    <p style="margin-top: 12px; font-size: 15px; color: rgba(255,255,255,0.35);">
+      협력사 엑셀 검증 자동화 — Claude Code와 함께 만든 웹 도구
+    </p>
+  </div>
+</div>
+
+<!-- SLIDE 2: 업무 소개 -->
+<div class="slide theme-problem" id="slide-1">
+  <span class="slide-num">02 / 08</span>
+  <div style="width: 100%; max-width: 980px;">
+    <span class="tag tag-red">Context</span>
+    <h2> 상품 전산등록 업무, 어렵진 않지만 성가시다. </h2>
+    <div class="divider"></div>
+    <div style="display: flex; gap: 40px; align-items: flex-start; margin-top: 8px;">
+
+      <div style="flex: 1.1; display: flex; flex-direction: column; gap: 16px;">
+        <!-- 등장인물 -->
+        <div class="hover-lift" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 20px 24px;">
+          <p style="font-size: 12px; font-weight: 700; letter-spacing: 2px; color: rgba(255,255,255,0.35); margin-bottom: 14px;">PLAYERS</p>
+          <div style="display: flex; gap: 12px; align-items: stretch;">
+            <div class="hover-lift-blue" style="flex: 1; background: rgba(0,102,204,0.12); border: 1px solid rgba(0,102,204,0.25); border-radius: 10px; padding: 14px 16px; text-align: center;">
+              <div style="font-size: 26px; margin-bottom: 6px;">🏢</div>
+              <div style="font-size: 13px; font-weight: 700; color: #4d9eff;">상품등록 담당자</div>
+              <div style="font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 4px;">검토 · 승인 · 반려</div>
+            </div>
+            <div style="display: flex; align-items: center; color: rgba(255,255,255,0.2); font-size: 22px;">⇄</div>
+            <div class="hover-lift-yellow" style="flex: 1; background: rgba(255,200,0,0.08); border: 1px solid rgba(255,200,0,0.2); border-radius: 10px; padding: 14px 16px; text-align: center;">
+              <div style="font-size: 26px; margin-bottom: 6px;">🤝</div>
+              <div style="font-size: 13px; font-weight: 700; color: #ffd84d;">18개 협력사</div>
+              <div style="font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 4px;">엑셀 작성 · 제출</div>
+            </div>
+            <div style="display: flex; align-items: center; color: rgba(255,255,255,0.2); font-size: 22px;">→</div>
+            <div class="hover-lift-green" style="flex: 1; background: rgba(29,185,84,0.08); border: 1px solid rgba(29,185,84,0.2); border-radius: 10px; padding: 14px 16px; text-align: center;">
+              <div style="font-size: 26px; margin-bottom: 6px;">🛒</div>
+              <div style="font-size: 13px; font-weight: 700; color: #4ddd88;">KOS</div>
+              <div style="font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 4px;">KT 상품 판매 시스템</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 엑셀 양식 설명 -->
+        <div class="hover-lift" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 20px 24px;">
+          <p style="font-size: 12px; font-weight: 700; letter-spacing: 2px; color: rgba(255,255,255,0.35); margin-bottom: 14px;">THE FORM</p>
+          <p style="font-size: 15px; color: rgba(255,255,255,0.75); line-height: 1.7;">
+            협력사는 상품을 전산에 올리기 위해 <span style="color:#fff; font-weight:700;">63개 열짜리 엑셀 양식</span>을 작성해야 한다.<br>
+            상품명·가격·약정 유형·리스사·공급사 등 세부 조건을 모두 채워 제출하면,<br>
+            KT 담당자가 규칙에 맞는지 검토한 뒤 승인 또는 반려를 결정한다.
+          </p>
+        </div>
+      </div>
+
+      <!-- 플로우 -->
+      <div style="flex: 0.75;">
+        <div class="hover-lift" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 20px 24px; height: 100%;">
+          <p style="font-size: 12px; font-weight: 700; letter-spacing: 2px; color: rgba(255,255,255,0.35); margin-bottom: 16px;">FLOW</p>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <div class="flow-step" style="background: rgba(255,200,0,0.08); border-color: rgba(255,200,0,0.2); color: #ffd84d;">① 협력사: 엑셀 양식 작성</div>
+            <div class="flow-arrow" style="padding-left: 16px; color: rgba(255,255,255,0.2);">↓</div>
+            <div class="flow-step" style="background: rgba(255,200,0,0.08); border-color: rgba(255,200,0,0.2); color: #ffd84d;">② 비즈스퀘어에 파일 제출</div>
+            <div class="flow-arrow" style="padding-left: 16px; color: rgba(255,255,255,0.2);">↓</div>
+            <div class="flow-step" style="background: rgba(0,102,204,0.1); border-color: rgba(0,102,204,0.25); color: #4d9eff;">③ KT 담당자 검토</div>
+            <div class="flow-arrow" style="padding-left: 16px; color: rgba(255,255,255,0.2);">↓</div>
+            <div style="display: flex; gap: 8px;">
+              <div class="flow-step" style="flex: 1; text-align: center; background: rgba(29,185,84,0.1); border-color: rgba(29,185,84,0.25); color: #4ddd88; font-size: 13px;">승인 → KOS 등록</div>
+              <div class="flow-step" style="flex: 1; text-align: center; background: rgba(232,25,44,0.1); border-color: rgba(232,25,44,0.25); color: #ff4d5e; font-size: 13px;">반려 → 재제출</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: 문제 -->
+<div class="slide theme-problem" id="slide-2-prob" style="background: linear-gradient(135deg, #1a0808 0%, #2a0a0a 100%); padding-bottom: 100px;">
+  <span class="slide-num">03 / 08</span>
+  <div style="width: 100%; max-width: 960px;">
+    <span class="tag tag-red">Problem</span>
+    <h2>하루에 <span style="color:#ff4d5e;">6건씩</span> 반려·수정<br>그 반복이 너무 지겨웠다</h2>
+    <div class="divider"></div>
+    <div style="display: flex; gap: 48px; align-items: flex-start; margin-top: 8px;">
+      <div style="flex: 1;">
+        <div class="flow" style="justify-content: flex-start; flex-direction: column; align-items: flex-start; gap: 2px;">
+          <div class="flow-step bad">① 협력사가 비즈스퀘어에 엑셀 제출</div>
+          <div class="flow-arrow" style="padding-left: 16px; font-size: 14px; line-height: 1;">↓</div>
+          <div class="flow-step bad">② 비즈스퀘어에서 파일 다운로드</div>
+          <div class="flow-arrow" style="padding-left: 16px; font-size: 14px; line-height: 1;">↓</div>
+          <div class="flow-step bad">③ KOS(사내 전산)에 업로드 시도</div>
+          <div class="flow-arrow" style="padding-left: 16px; font-size: 14px; line-height: 1;">↓</div>
+          <div class="flow-step bad">④ 오류 발생 → 15개 규칙 중 뭐가 틀렸나 직접 확인</div>
+          <div class="flow-arrow" style="padding-left: 16px; font-size: 14px; line-height: 1;">↓</div>
+          <div class="flow-step bad">⑤ 반려 의견 직접 타이핑</div>
+          <div class="flow-arrow" style="padding-left: 16px; font-size: 14px; line-height: 1;">↓</div>
+          <div class="flow-step bad">⑥ 협력사에 재제출 요청 — 반복</div>
+        </div>
+      </div>
+      <div style="flex: 1; display: flex; flex-direction: column; gap: 20px;">
+        <div class="card red-glow" style="padding: 16px 24px;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <div class="icon" style="font-size: 24px; margin-bottom: 0;">😮‍💨</div>
+            <h3>18개 협력사</h3>
+          </div>
+          <p>모두 같은 양식을 쓰는데, 협력사마다 같은 실수를 반복해서 제출</p>
+        </div>
+        <div class="card red-glow" style="padding: 16px 24px;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <div class="icon" style="font-size: 24px; margin-bottom: 0;">🔒</div>
+            <h3>업무용 PC 보안 정책</h3>
+          </div>
+          <p>Claude Code, 외부 서비스 파일 업로드 불가 → 모든 단계가 수동</p>
+        </div>
+        <div class="card red-glow" style="padding: 16px 24px;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <div class="icon" style="font-size: 24px; margin-bottom: 0;">📋</div>
+            <h3>15가지 검증 규칙</h3>
+          </div>
+          <p>벤더사-공급사 매핑, 가격 칸, 제품명 형식… 외워야 할 게 너무 많다</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4: AI가 동료가 된 순간 -->
+<div class="slide theme-colleague" id="slide-2">
+  <span class="slide-num">04 / 08</span>
+  <div style="width: 100%; max-width: 960px;">
+    <span class="tag tag-blue">AI as Colleague</span>
+    <h2>도구가 아닌 <span style="color:#4d9eff;">동료</span>가 된 순간</h2>
+    <div class="divider"></div>
+    <div class="cards col2" style="margin-top: 8px;">
+      <div>
+        <div class="quote" style="margin-bottom: 20px;">
+          <strong>나:</strong> "이 규칙 목록 보고 검증 코드 짜줘"<br><br>
+          <strong>Claude:</strong> "택셀네트컴/텍셀네트컴 표기 불일치는 KOS 전산에 이미 그렇게 등록된 거니까 수정하면 안 되겠죠. 그대로 두겠습니다."
+        </div>
+        <div class="quote">
+          <strong>나:</strong> "FastAPI 백엔드로 만들어줘"<br><br>
+          <strong>Claude:</strong> "규칙 15개 다 명확한 조건 분기예요. 굳이 서버 안 써도 됩니다. 브라우저만으로 구현하면 보안 이슈도 없어요."
+        </div>
+      </div>
+      <div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-dot red">1</div>
+            <div class="tl-body">
+              <h3>CLAUDE.md에 규칙을 썼더니</h3>
+              <p>내가 설명 안 해도 맥락을 파악하고 코드를 짰다</p>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot blue">2</div>
+            <div class="tl-body">
+              <h3>피벗을 제안해왔다</h3>
+              <p>FastAPI → 순수 HTML. 서버 비용 0, 보안 이슈 0</p>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot green">3</div>
+            <div class="tl-body">
+              <h3>예외를 스스로 발견했다</h3>
+              <p>택셀/텍셀 오타처럼 보이지만 전산 등록값 — 건드리면 안 됨</p>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot yellow">4</div>
+            <div class="tl-body">
+              <h3>선을 지켰다</h3>
+              <p>"사업 특성 판단은 담당자가 해야 합니다" — 스스로 한계를 선언</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 5: 역할 확장 -->
+<div class="slide theme-expand" id="slide-3">
+  <span class="slide-num">05 / 08</span>
+  <div style="width: 100%; max-width: 960px;">
+    <span class="tag tag-green">Role Expansion</span>
+    <h2>전에는 못했던 것을<br><span style="color:#4ddd88;">할 수 있게 됐다</span></h2>
+    <div class="divider"></div>
+    <div class="ba-wrap" style="margin-top: 8px;">
+      <div class="ba-col before">
+        <div class="ba-label">Before Agent</div>
+        <div class="ba-item"><span>❌</span> 개발자 없이 웹 앱 불가능</div>
+        <div class="ba-item"><span>❌</span> 규칙 바뀌면 문서만 수정</div>
+        <div class="ba-item"><span>❌</span> 협력사 셀프 검증 불가</div>
+        <div class="ba-item"><span>❌</span> 기획자 = 검증 전담 인력</div>
+        <div class="ba-item"><span>❌</span> 오류 유형 파악 불가</div>
+      </div>
+      <div class="ba-arrow">→</div>
+      <div class="ba-col after">
+        <div class="ba-label">After Agent</div>
+        <div class="ba-item"><span>✅</span> 단일 HTML 파일로 웹 서비스 완성</div>
+        <div class="ba-item"><span>✅</span> CLAUDE.md 수정 → 코드 자동 반영</div>
+        <div class="ba-item"><span>✅</span> 협력사가 스스로 업로드·검증·수정</div>
+        <div class="ba-item"><span>✅</span> 담당자는 최종 승인만 담당</div>
+        <div class="ba-item"><span>✅</span> 오류 패턴 통계 확장 가능</div>
+      </div>
+    </div>
+    <div style="margin-top: 24px; text-align: center;">
+      <p style="font-size: 16px; color: rgba(255,255,255,0.5);">기획자가 개발자 없이 <span class="highlight">3주</span> 만에 프로덕션 수준 웹 서비스 완성</p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6: 암묵지 형식화 -->
+<div class="slide theme-tacit" id="slide-4">
+  <span class="slide-num">06 / 08</span>
+  <div style="width: 100%; max-width: 1000px;">
+    <span class="tag tag-yellow">Tacit Knowledge</span>
+    <h2>머릿속에만 있던 것을<br><span style="color:#ffd84d;">CLAUDE.md</span>에 담았다</h2>
+    <div class="divider"></div>
+    <div class="rule-grid" style="margin-top: 8px;">
+      <div class="rule-item">
+        <div class="rnum">1</div>
+        <div class="rtxt"><strong>벤더사 ↔ 공급사명 1:1 매핑</strong>18쌍. 공백 하나도 틀리면 오류</div>
+      </div>
+      <div class="rule-item">
+        <div class="rnum">2</div>
+        <div class="rtxt"><strong>기본연도 9개 허용값</strong>무약정·반납·완불 조합만 허용</div>
+      </div>
+      <div class="rule-item">
+        <div class="rnum">3</div>
+        <div class="rtxt"><strong>기본연도 → 리스사명 자동 연계</strong>완불=KT커머스, 반납=AJ네트웍스</div>
+      </div>
+      <div class="rule-item">
+        <div class="rnum">4</div>
+        <div class="rtxt"><strong>상품 유형별 가격 칸 규칙</strong>채울 칸/비울 칸이 유형마다 다름</div>
+      </div>
+      <div class="rule-item">
+        <div class="rnum">5</div>
+        <div class="rtxt"><strong>제품명 형식 3가지</strong>[보안] / [보안][SA] / [보안-CarePack]</div>
+      </div>
+      <div class="rule-item">
+        <div class="rnum">9</div>
+        <div class="rtxt"><strong>서비스번호 입력 여부 — 사람 판단</strong>AI는 존재 확인만, 사업 특성은 담당자가</div>
+      </div>
+      <div class="rule-item">
+        <div class="rnum">11</div>
+        <div class="rtxt"><strong>CarePack 단일 통합 등록</strong>제품이 여러 개여도 1행으로 묶어야</div>
+      </div>
+      <div class="rule-item">
+        <div class="rnum">15</div>
+        <div class="rtxt"><strong>양식 구조 훼손 감지</strong>표준 63열 대비 누락 시 재작성 요청</div>
+      </div>
+    </div>
+    <div style="margin-top: 20px; text-align: center;">
+      <p style="font-size: 14px; color: rgba(255,255,255,0.35);">
+        이 규칙들은 신규 담당자 온보딩 문서에도 없었다 — 오직 머릿속에만 존재했다
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: 시연 -->
+<div class="slide theme-demo" id="slide-5">
+  <span class="slide-num">07 / 08</span>
+  <div style="text-align: center; width: 100%; max-width: 840px;">
+    <span class="tag tag-gray">Live Demo</span>
+    <h2 style="font-size: 44px;">직접 보여드리겠습니다</h2>
+    <div class="divider" style="margin: 24px auto;"></div>
+    <div class="cards col3" style="margin-bottom: 32px;">
+      <div class="card">
+        <div class="icon">📤</div>
+        <h3>엑셀 업로드</h3>
+        <p>협력사가 작성한 .xlsx를 드래그 앤 드롭</p>
+      </div>
+      <div class="card">
+        <div class="icon">🔍</div>
+        <h3>15개 규칙 검증</h3>
+        <p>행 단위로 오류 / 확인 요청 / 이상 없음 분류</p>
+      </div>
+      <div class="card">
+        <div class="icon">📥</div>
+        <h3>수정 후 다운로드</h3>
+        <p>인라인 수정 → 동일 오류 일괄 적용 → xlsx 재생성</p>
+      </div>
+    </div>
+    <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+      <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px 24px; font-size: 14px; color: rgba(255,255,255,0.6);">
+        서버 없음 — 파일이 외부로 나가지 않음
+      </div>
+      <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px 24px; font-size: 14px; color: rgba(255,255,255,0.6);">
+        단일 HTML 파일 — Netlify로 1분 배포
+      </div>
+      <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px 24px; font-size: 14px; color: rgba(255,255,255,0.6);">
+        협력사 셀프 검증 — 담당자 개입 최소화
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8: 마무리 -->
+<div class="slide theme-end" id="slide-6">
+  <span class="slide-num">08 / 08</span>
+  <div style="text-align: center; width: 100%; max-width: 760px;">
+    <span class="tag tag-blue">Takeaway</span>
+    <h2 style="font-size: 42px; line-height: 1.3;">
+      기획자가 개발자 없이<br>
+      <span style="color: #4d9eff;">3주</span>에 웹 서비스를 만들었다
+    </h2>
+    <div class="divider" style="margin: 28px auto;"></div>
+    <div class="cards col3" style="margin-bottom: 32px;">
+      <div class="card blue-glow">
+        <div class="icon">🧠</div>
+        <h3>암묵지 → 코드</h3>
+        <p>머릿속 규칙을 CLAUDE.md로 꺼내 에이전트에 직접 심었다</p>
+      </div>
+      <div class="card green-glow">
+        <div class="icon">🚀</div>
+        <h3>역할 확장</h3>
+        <p>기획 + 개발 + 운영까지. 혼자서 처음부터 끝까지</p>
+      </div>
+      <div class="card yellow-glow">
+        <div class="icon">🤝</div>
+        <h3>적절한 선</h3>
+        <p>AI가 판단 못 하는 것은 담당자에게 넘겼다 — 함께 설계했다</p>
+      </div>
+    </div>
+    <p style="font-size: 15px; color: rgba(255,255,255,0.35);">
+      하루 6건 수동 반려 → 협력사 셀프 검증으로 전환<br>
+      담당자는 최종 승인에만 집중할 수 있게 되었다
+    </p>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button id="prev-btn" onclick="prevSlide()" disabled>← 이전</button>
+  <div class="dots" id="dots"></div>
+  <button id="next-btn" class="primary" onclick="nextSlide()">다음 →</button>
+</div>
+
+<div class="key-hint">← → 키로 이동</div>
+
+<script>
+  const slideIds = ['slide-0','slide-1','slide-2-prob','slide-2','slide-3','slide-4','slide-5','slide-6'];
+  const total = slideIds.length;
+  let current = 0;
+
+  function renderDots() {
+    const d = document.getElementById('dots');
+    d.innerHTML = '';
+    for (let i = 0; i < total; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'dot' + (i === current ? ' active' : '');
+      dot.onclick = () => goTo(i);
+      d.appendChild(dot);
+    }
+  }
+
+  function goTo(n) {
+    document.getElementById(slideIds[current]).classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    document.getElementById(slideIds[current]).classList.add('active');
+    document.getElementById('prev-btn').disabled = current === 0;
+    document.getElementById('next-btn').disabled = current === total - 1;
+    document.getElementById('next-btn').textContent = current === total - 1 ? '완료' : '다음 →';
+    renderDots();
+  }
+
+  function nextSlide() { if (current < total - 1) goTo(current + 1); }
+  function prevSlide() { if (current > 0) goTo(current - 1); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+    if (e.key === 'ArrowLeft') prevSlide();
+  });
+
+  renderDots();
+</script>
+</body>
+</html>
