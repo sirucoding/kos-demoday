@@ -520,8 +520,13 @@
   /* ──────────────── MOBILE ──────────────── */
   @media (max-width: 768px) {
 
-    /* 기본 레이아웃 */
-    .slide { padding: 52px 20px 88px; }
+    /* 기본 레이아웃 — 스크롤 허용 */
+    .slide {
+      padding: 56px 20px 100px;
+      overflow-y: auto;
+      justify-content: flex-start;
+      align-items: flex-start;
+    }
     .key-hint { display: none; }
     .slide-num { font-size: 11px; top: 18px; right: 20px; }
 
@@ -586,13 +591,22 @@
     .slide-num ~ div a[href] { font-size: 14px !important; padding: 12px 24px !important; }
 
     /* nav */
-    .nav { gap: 8px; bottom: 20px; }
+    .nav {
+      gap: 8px;
+      bottom: 16px;
+      padding: 10px 16px;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 100px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
     .nav button { padding: 8px 16px; font-size: 13px; }
     .dot { width: 6px; height: 6px; }
   }
 
   @media (max-width: 400px) {
-    .slide { padding: 48px 16px 84px; }
+    .slide { padding: 52px 16px 100px; overflow-y: auto; justify-content: flex-start; align-items: flex-start; }
     h2 { font-size: 19px; }
     .cover-content h1 { font-size: 30px; }
     .flow-step { font-size: 12px !important; padding: 8px 12px !important; }
