@@ -516,6 +516,87 @@
     color: rgba(255,255,255,0.2);
     letter-spacing: 1px;
   }
+
+  /* ──────────────── MOBILE ──────────────── */
+  @media (max-width: 768px) {
+
+    /* 기본 레이아웃 */
+    .slide { padding: 52px 20px 88px; }
+    .key-hint { display: none; }
+    .slide-num { font-size: 11px; top: 18px; right: 20px; }
+
+    /* 타이포그래피 */
+    h1 { font-size: 32px; letter-spacing: -1px; }
+    h2 { font-size: 22px; letter-spacing: -0.5px; }
+    h3 { font-size: 15px; }
+    p  { font-size: 14px; }
+    .sub { font-size: 15px; }
+    .cover-content h1 { font-size: 36px; }
+    .tag { font-size: 10px; padding: 5px 12px; margin-bottom: 14px; }
+    .divider { margin: 14px 0; }
+
+    /* 표지 */
+    .cover-badge { font-size: 11px; padding: 6px 14px; margin-bottom: 20px; }
+
+    /* 2단 → 1단 (슬라이드 2, 3) */
+    .slide-cols { flex-direction: column !important; gap: 16px !important; }
+
+    /* 슬라이드 2: PLAYERS 3칸 유지하되 compact */
+    .players-row { gap: 6px !important; }
+    .players-row > div { padding: 10px 6px !important; }
+    .players-row > div > div:first-child { font-size: 20px !important; margin-bottom: 4px !important; }
+    .players-row > div > div:nth-child(2) { font-size: 11px !important; }
+    .players-row > div > div:nth-child(3) { font-size: 10px !important; }
+    .players-row > [style*="font-size: 22px"] { font-size: 14px !important; }
+
+    /* 슬라이드 2: FLOW 박스 height 해제 */
+    .slide-cols > div:last-child > div { height: auto !important; }
+
+    /* 카드 그리드: 1열로 */
+    .cards.col2,
+    .cards.col3 { grid-template-columns: 1fr !important; gap: 12px; }
+    .card { padding: 20px 20px; }
+    .card .icon { font-size: 24px; margin-bottom: 10px; }
+    .card h3 { font-size: 15px; }
+    .card p  { font-size: 13px; }
+
+    /* flow-step: 줄바꿈 허용 */
+    .flow-step { white-space: normal !important; font-size: 13px !important; padding: 9px 14px !important; }
+
+    /* Quote */
+    .quote { font-size: 14px; padding: 12px 16px; }
+
+    /* Timeline */
+    .tl-body h3 { font-size: 14px; }
+    .tl-body p  { font-size: 12px; }
+
+    /* Before/After: 세로 스택 */
+    .ba-wrap { grid-template-columns: 1fr !important; gap: 12px; }
+    .ba-arrow { display: none; }
+    .ba-col { padding: 20px; }
+    .ba-item { font-size: 13px; }
+
+    /* Rule grid: 1열 */
+    .rule-grid { grid-template-columns: 1fr !important; gap: 8px; }
+    .rule-item { padding: 11px 14px; }
+    .rule-item .rtxt { font-size: 12px; }
+    .rule-item .rtxt strong { font-size: 12px; }
+
+    /* 시연 버튼 */
+    .slide-num ~ div a[href] { font-size: 14px !important; padding: 12px 24px !important; }
+
+    /* nav */
+    .nav { gap: 8px; bottom: 20px; }
+    .nav button { padding: 8px 16px; font-size: 13px; }
+    .dot { width: 6px; height: 6px; }
+  }
+
+  @media (max-width: 400px) {
+    .slide { padding: 48px 16px 84px; }
+    h2 { font-size: 19px; }
+    .cover-content h1 { font-size: 30px; }
+    .flow-step { font-size: 12px !important; padding: 8px 12px !important; }
+  }
 </style>
 </head>
 <body>
@@ -543,13 +624,13 @@
     <span class="tag tag-red">Context</span>
     <h2> 상품 전산등록 업무, 어렵진 않지만 성가시다. </h2>
     <div class="divider"></div>
-    <div style="display: flex; gap: 40px; align-items: flex-start; margin-top: 8px;">
+    <div class="slide-cols" style="display: flex; gap: 40px; align-items: flex-start; margin-top: 8px;">
 
       <div style="flex: 1.1; display: flex; flex-direction: column; gap: 16px;">
         <!-- 등장인물 -->
         <div class="hover-lift" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 20px 24px;">
           <p style="font-size: 12px; font-weight: 700; letter-spacing: 2px; color: rgba(255,255,255,0.35); margin-bottom: 14px;">PLAYERS</p>
-          <div style="display: flex; gap: 12px; align-items: stretch;">
+          <div class="players-row" style="display: flex; gap: 12px; align-items: stretch;">
             <div class="hover-lift-blue" style="flex: 1; background: rgba(0,102,204,0.12); border: 1px solid rgba(0,102,204,0.25); border-radius: 10px; padding: 14px 16px; text-align: center;">
               <div style="font-size: 26px; margin-bottom: 6px;">🏢</div>
               <div style="font-size: 13px; font-weight: 700; color: #4d9eff;">상품등록 담당자</div>
@@ -611,7 +692,7 @@
     <span class="tag tag-red">Problem</span>
     <h2>일주일에 <span style="color:#ff4d5e;">50건씩</span> 반려·수정<br>그 반복이 너무 지겨웠다</h2>
     <div class="divider"></div>
-    <div style="display: flex; gap: 48px; align-items: flex-start; margin-top: 8px;">
+    <div class="slide-cols" style="display: flex; gap: 48px; align-items: flex-start; margin-top: 8px;">
       <div style="flex: 1;">
         <div class="flow" style="justify-content: flex-start; flex-direction: column; align-items: flex-start; gap: 2px;">
           <div class="flow-step bad">① 협력사가 비즈스퀘어에 엑셀 제출</div>
